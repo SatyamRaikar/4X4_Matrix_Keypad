@@ -1,0 +1,177 @@
+// PIC16F877A Configuration Bit Settings
+
+// 'C' source line config statements
+
+// CONFIG
+#pragma config FOSC = EXTRC     // Oscillator Selection bits (RC oscillator)
+#pragma config WDTE = OFF        // Watchdog Timer Enable bit (WDT enabled)
+#pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
+#pragma config BOREN = OFF       // Brown-out Reset Enable bit (BOR enabled)
+#pragma config LVP = OFF         // Low-Voltage (Single-Supply) In-Circuit Serial Programming Enable bit (RB3/PGM pin has PGM function; low-voltage programming enabled)
+#pragma config CPD = OFF        // Data EEPROM Memory Code Protection bit (Data EEPROM code protection off)
+#pragma config WRT = OFF        // Flash Program Memory Write Enable bits (Write protection off; all program memory may be written to by EECON control)
+#pragma config CP = OFF         // Flash Program Memory Code Protection bit (Code protection off)
+
+// #pragma config statements should precede project file includes.
+// Use project enums instead of #define for ON and OFF.
+
+#include <xc.h>
+#define _XTAL_FREQ 6000000
+
+void Lcd_Command(unsigned char);
+void initialization();
+void Lcd_Data(unsigned char);
+unsigned char Key_Pad(void);
+unsigned char ch[20]={"ENTER THE VALUE"},cl[20]={"0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20"},count=0;
+
+unsigned char i,n;
+void main(){
+    initialization();
+    while(1)
+    {
+       
+        n=Key_Pad();
+        if(n!=' ')
+       {
+            if(n=='T')
+            {
+             Lcd_Command(0x01);
+             initialization();
+             
+            }
+            else
+            {__delay_ms(100);
+        Lcd_Data(n);
+            }
+   
+      } 
+    }
+}
+
+void initialization(){
+    PORTB=0X00;
+    TRISB=0x0F;
+    PORTB=0XF0;
+    PORTB=0XE0;
+    OPTION_REG&=0X7F;
+    TRISC=0x00;
+    TRISD=0x00;
+    Lcd_Command(0x38);
+    __delay_ms(10);
+    Lcd_Command(0x38);
+    __delay_ms(10);
+    Lcd_Command(0x38);
+    __delay_ms(10);
+    Lcd_Command(0x38);
+    __delay_ms(10);
+    Lcd_Command(0x06);
+    __delay_ms(10);
+    Lcd_Command(0x0C);
+    __delay_ms(10);
+    Lcd_Command(0x01);
+    __delay_ms(10);
+    Lcd_Command(0x80);
+    __delay_ms(10);
+    for (i=0;i<=15;i++)
+    {
+        Lcd_Data(ch[i]);
+    }
+    Lcd_Command(0xC0);
+    
+}
+
+void Lcd_Command(unsigned char t){
+    PORTC&=~0x08;
+    PORTD=t;
+    PORTC|=0x01;
+    PORTC&=~0x01;
+    __delay_ms(50);
+}
+
+void Lcd_Data(unsigned char t){
+    PORTC|=0x08;
+    PORTD=t;
+    PORTC|=0x01;
+    PORTC&=~0x01;
+    __delay_ms(5);
+}
+unsigned char Key_Pad(void)
+{
+    PORTB=0XE0;
+   __delay_ms(200);
+    if(RB0==0)
+    {
+        return('1');
+    }
+    else if (RB1==0)
+    {
+        return('4');
+    }
+    else if (RB2==0)
+    {
+        return('7');
+    }
+    else if (RB3==0)
+    { 
+        return('*');
+    }
+    PORTB=0XD0;
+   
+    if(RB0==0)
+    {
+        return('2');
+    }
+    else if (RB1==0)
+    {
+        return('5');
+    }
+    else if (RB2==0)
+    {
+        return('8');
+    }
+    else if (RB3==0)
+    { 
+        return('0');
+    }
+    PORTB=0XB0;
+  
+    if(RB0==0)
+    {
+        return('3');
+    }
+    else if (RB1==0)
+    {
+        return('6');
+    }
+    else if (RB2==0)
+    {
+        return('9');
+    }
+    else if (RB3==0)
+    { 
+        return('T');
+    }
+    PORTB=0X70;
+   
+    if(RB0==0)
+    {
+        return('A');
+    }
+    else if (RB1==0)
+    {
+        return('B');
+    }
+    else if (RB2==0)
+    {
+        return('C');
+    }
+    else if (RB3==0)
+    {
+        return('D');
+    }
+     else  
+    {
+        return(' ');
+    }
+    
+}
